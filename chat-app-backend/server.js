@@ -12,7 +12,11 @@ const app = express();
 const server = http.createServer(app);
 
 // Middleware
-app.use(cors());
+// UPDATED: Express CORS now trusts your Vercel URL
+app.use(cors({
+    origin: process.env.FRONTEND_URL || "http://localhost:5173",
+    credentials: true
+}));
 app.use(express.json()); 
 
 // API Routes
@@ -37,10 +41,12 @@ app.put('/api/users/update', async (req, res) => {
 // ---------------------------------
 
 // Initialize Socket.io
+// UPDATED: Socket.io CORS now trusts your Vercel URL
 const io = new Server(server, {
     cors: {
-        origin: "http://localhost:5173", // Your React frontend will run here
-        methods: ["GET", "POST"]
+        origin: process.env.FRONTEND_URL || "http://localhost:5173",
+        methods: ["GET", "POST"],
+        credentials: true
     }
 });
 
