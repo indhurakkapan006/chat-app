@@ -11,7 +11,8 @@ const chatRoutes = require('./routes/chat');
 const app = express();
 const server = http.createServer(app);
 
-// --- UPDATED ROBUST CORS MIDDLEWARE ---
+// --- ROBUST CORS CONFIGURATION ---
+// This handles regular API requests
 app.use(cors({
     origin: ["https://chat-app-one-sage-64.vercel.app", "http://localhost:5173"],
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
@@ -19,9 +20,18 @@ app.use(cors({
     credentials: true
 }));
 
-// Explicitly handle pre-flight OPTIONS requests before other routes
-app.options('(.*)', cors());
-// --------------------------------------
+// --- NODE v22 COMPATIBLE OPTIONS HANDLER ---
+// This middleware replaces app.options('*') to prevent PathError in Node v22
+app.use((req, res, next) => {
+    if (req.method === 'OPTIONS') {
+        res.header('Access-Control-Allow-Origin', 'https://chat-app-one-sage-64.vercel.app');
+        res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+        res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+        res.header('Access-Control-Allow-Credentials', 'true');
+        return res.sendStatus(200);
+    }
+    next();
+});
 
 app.use(express.json()); 
 
@@ -51,7 +61,7 @@ const io = new Server(server, {
     }
 });
 
-// 
+
 
 // Listen for real-time socket connections
 io.on('connection', (socket) => {
@@ -59,8 +69,12 @@ io.on('connection', (socket) => {
 
     socket.on('user_connected', async (userId) => {
         socket.data.userId = userId;
-        await db.query('UPDATE users SET is_online = TRUE WHERE id = ?', [userId]);
-        io.emit('update_users_status'); 
+        try {
+            await db.query('UPDATE users SET is_online = TRUE WHERE id = ?', [userId]);
+            io.emit('update_users_status'); 
+        } catch (err) {
+            console.error('Socket user_connected error:', err);
+        }
     });
 
     socket.on('join_room', async ({ roomId, roomName, userId }) => {
@@ -111,8 +125,12 @@ io.on('connection', (socket) => {
     socket.on('disconnect', async () => {
         console.log(`🔌 User Disconnected: ${socket.id}`);
         if (socket.data.userId) {
-            await db.query('UPDATE users SET is_online = FALSE WHERE id = ?', [socket.data.userId]);
-            io.emit('update_users_status');
+            try {
+                await db.query('UPDATE users SET is_online = FALSE WHERE id = ?', [socket.data.userId]);
+                io.emit('update_users_status');
+            } catch (err) {
+                console.error('Socket disconnect error:', err);
+            }
         }
     });
 });
@@ -121,6 +139,7 @@ app.get('/', (req, res) => {
     res.send('Chat App Backend is running securely!');
 });
 
+// Use Render's default port or 10000
 const PORT = process.env.PORT || 10000;
 server.listen(PORT, () => {
     console.log(`🚀 Server is running on port ${PORT}`);
