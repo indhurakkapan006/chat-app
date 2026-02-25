@@ -39,13 +39,15 @@ export default function ChatRoom() {
 
   // --- 1. INITIAL SETUP ---
   useEffect(() => {
-    const newSocket = io('http://localhost:5000');
+    // UPDATED: Socket connection
+    const newSocket = io(import.meta.env.VITE_BACKEND_URL);
     setSocket(newSocket);
     newSocket.emit('user_connected', userId);
 
     const fetchRooms = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/api/chat/rooms');
+        // UPDATED: Fetch rooms
+        const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/chat/rooms`);
         setRooms(response.data);
         response.data.forEach(room => {
           newSocket.emit('join_room', { roomId: room.room_id, roomName: room.room_name, userId });
@@ -57,7 +59,8 @@ export default function ChatRoom() {
 
     const fetchUsers = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/api/chat/users');
+        // UPDATED: Fetch users
+        const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/chat/users`);
         setUsers(response.data);
       } catch (error) {
         console.error('Error fetching users:', error);
@@ -78,7 +81,8 @@ export default function ChatRoom() {
 
     const fetchMessages = async () => {
       try {
-        const response = await axios.get(`http://localhost:5000/api/chat/messages/${currentRoom.id}`);
+        // UPDATED: Fetch messages
+        const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/chat/messages/${currentRoom.id}`);
         setMessages(response.data);
       } catch (error) {
         console.error('Error fetching messages:', error);
@@ -139,12 +143,13 @@ export default function ChatRoom() {
     window.location.href = '/login';
   };
 
- const handleUpdateProfile = async (e) => {
+  const handleUpdateProfile = async (e) => {
     e.preventDefault();
     if (!profileName.trim()) return;
 
     try {
-      await axios.put('http://localhost:5000/api/users/update', { userId, newUsername: profileName });
+      // UPDATED: Update profile
+      await axios.put(`${import.meta.env.VITE_BACKEND_URL}/api/users/update`, { userId, newUsername: profileName });
       localStorage.setItem('username', profileName);
       
       // NEW: Tell the socket server to notify all other online users!

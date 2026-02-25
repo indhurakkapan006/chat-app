@@ -15,14 +15,14 @@ export default function Signup() {
 
     try {
       // 1. Send data to the backend to create the user in MySQL
-      await axios.post('http://localhost:5000/api/auth/signup', {
+      await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/auth/signup`, {
         username,
         email,
         password
       });
 
       // 2. Automatically log them in right after!
-      const loginResponse = await axios.post('http://localhost:5000/api/auth/login', {
+      const loginResponse = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/auth/login`, {
         email,
         password
       });

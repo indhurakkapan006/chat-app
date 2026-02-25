@@ -13,8 +13,8 @@ export default function Login() {
     setError('');
 
     try {
-      // Connect to your Node.js backend
-      const response = await axios.post('http://localhost:5000/api/auth/login', {
+      // Connect to your Node.js backend using the environment variable
+      const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/auth/login`, {
         email,
         password
       });
