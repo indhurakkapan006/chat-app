@@ -20,7 +20,7 @@ app.use(cors({
 }));
 
 // Explicitly handle pre-flight OPTIONS requests before other routes
-app.options('*', cors()); 
+app.options('(.*)', cors());
 // --------------------------------------
 
 app.use(express.json()); 
