@@ -3,8 +3,8 @@ const mysql = require('mysql2/promise');
 async function setupDatabase() {
     try {
         console.log("⏳ Connecting to Aiven to build tables...");
-        // Change this line to use the environment variable
-const connection = await mysql.createConnection(process.env.DATABASE_URL);
+        // Connect using DATABASE_URL so credentials remain out of source control
+        const connection = await mysql.createConnection(process.env.DATABASE_URL);
 
         console.log("✅ Connected! Creating missing tables...");
 

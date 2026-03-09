@@ -4,9 +4,23 @@ const db = require('../db');
 
 // --- 1. GET ALL ROOMS ---
 // Used to populate your sidebar and power the room search bar
+// Now filters rooms by userId - only returns rooms where the user is a participant
 router.get('/rooms', async (req, res) => {
+    const { userId } = req.query;
+    
     try {
-        const [rooms] = await db.query('SELECT * FROM rooms ORDER BY created_at DESC');
+        if (!userId) {
+            return res.status(400).json({ error: 'userId query parameter is required.' });
+        }
+
+        const [rooms] = await db.query(
+            `SELECT r.room_id, r.room_name 
+             FROM rooms r 
+             JOIN room_participants rp ON r.room_id = rp.room_id 
+             WHERE rp.user_id = ? 
+             ORDER BY r.room_id DESC`,
+            [userId]
+        );
         res.status(200).json(rooms);
     } catch (error) {
         console.error('Error fetching rooms:', error);

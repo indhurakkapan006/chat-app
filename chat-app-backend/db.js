@@ -1,9 +1,9 @@
 const mysql = require('mysql2/promise');
 require('dotenv').config();
 
-// Create a connection pool using the single Aiven URI
+// Create a connection pool using the DATABASE_URL environment variable
 const pool = mysql.createPool({
-    uri: process.env.DATABASE_URL, // This handles Host, User, Pass, Port, and DB Name automatically
+    uri: process.env.DATABASE_URL, // Aiven URI handles host/user/pass/ssl
     waitForConnections: true,
     connectionLimit: 10,
     queueLimit: 0

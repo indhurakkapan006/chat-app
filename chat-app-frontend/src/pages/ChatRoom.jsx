@@ -47,7 +47,7 @@ export default function ChatRoom() {
     const fetchRooms = async () => {
       try {
         // UPDATED: Fetch rooms
-        const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/chat/rooms`);
+        const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/chat/rooms?userId=${userId}`);
         setRooms(response.data);
         response.data.forEach(room => {
           newSocket.emit('join_room', { roomId: room.room_id, roomName: room.room_name, userId });
